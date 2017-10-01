@@ -12,15 +12,13 @@ __maintainer__ = "Daniel Mazzer"
 __email__ = "dmazzer@gmail.com"
 
 
+import os
+import time
+
 telemetry_file = '/usr/local/share/games/torcs/telemetry/Inferno.dat'
 debug_file = 'file.dat'
-# telemetry_data = open(telemetry_file, 'r')
-# 
-# print (telemetry_data.)
+torcs_path = '/usr/local/bin/torcs'
 
-
-
-import time
 def follow(thefile):
     thefile.seek(0,0)
     while True:
@@ -32,6 +30,22 @@ def follow(thefile):
         yield line
 
 if __name__ == '__main__':
+    print('## TORCS telemetry data processor ##')
+    print('')
+    
+    print('Deleting old telemetry file... ', end=''),
+    if os.path.isfile(telemetry_file):
+        if os.access(telemetry_file, os.W_OK):
+            os.remove(telemetry_file)
+            print('done')
+        else:
+            print('Impossible to delete file')
+    else:
+        print('file already deleted')
+            
+    print('Processing realtime telemetry data')
+#     os.spawnl(os.P_NOWAIT, torcs_path)
+    os.system(torcs_path + ' &') 
     debug_obj = open(debug_file, 'w')
     while True:
         try:
