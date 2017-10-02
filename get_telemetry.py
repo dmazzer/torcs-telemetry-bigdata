@@ -48,6 +48,8 @@ class Telemetry_Parser:
         
         self.stream_buffer = ''
         
+        self.ss = UDP_Socket_Server()
+        
         
     def follow(self, thefile):
         thefile.seek(0,0)
@@ -105,6 +107,7 @@ class Telemetry_Parser:
                  
             newline = (str(telemetry_parsed) + '\n')
             debug_p_obj.writelines(newline)
+            self.ss.send_udp(newline)
 
         self.parsed_line += 1
                  
@@ -112,13 +115,12 @@ class UDP_Socket_Server:
     def __init__(self):
         
         self.udp_ip = '127.0.0.1'
-        self.udp_port = '7000'
+        self.udp_port = 7000
         
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.conn.bind(self.udp_ip, self.udp_port)
         
     def send_udp(self, message):
-        self.conn.send(message)
+        self.conn.sendto(message.encode(), (self.udp_ip, self.udp_port))
 
 if __name__ == '__main__':
     print('## TORCS telemetry data processor ##')
