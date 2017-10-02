@@ -22,24 +22,38 @@ debug_file_raw = 'telemetry_raw.dat'
 debug_file_parsed = 'telemetry_parsed.dat'
 torcs_path = '/usr/local/bin/torcs'
 
-def follow(thefile):
-    thefile.seek(0,0)
-    while True:
-        line = thefile.readline()
-#        debug_r_obj.writelines(line)
-        if not line:
-            time.sleep(0.1)
-            continue
-        yield line
-
 class Telemetry_Parser:
-    def __init__(self, filename=None):
+    def __init__(self):
         
         self.parsed_line = 0
-        self.telemetry_parsed = dict()
         self.telemetry_parameters = 12 # hardcoded in torcs
         self.car_numbers = list()
         
+        self.stream_buffer = ''
+        
+        
+    def follow(self, thefile):
+        thefile.seek(0,0)
+        while True:
+            line = self.line_parser(thefile.readline())
+    #        debug_r_obj.writelines(line)
+            if not line:
+                time.sleep(0.1)
+                continue
+            yield line
+
+    def line_parser(self, telemetry_stream):
+        if telemetry_stream:
+            if telemetry_stream[-1] == '\n':
+                parsed_line = self.stream_buffer + telemetry_stream
+                self.stream_buffer = ''
+                return parsed_line
+            else:
+                self.stream_buffer = self.stream_buffer + telemetry_stream
+                return None
+        else:
+            return None
+                        
     def parser(self, telemetry_string):
         debug_r_obj.writelines(telemetry_string)
         
@@ -47,26 +61,32 @@ class Telemetry_Parser:
     #         print(telemetry_string)
             self.header = telemetry_string.split()
             self.racers = int( (len(self.header)-1)/self.telemetry_parameters )
+            self.totalparams = len(self.header)
             for x in range(1,self.racers*self.telemetry_parameters,self.telemetry_parameters):
-                self.car_numbers.append(x)
+                self.car_numbers.append(self.header[x][-1])
                
             print('Racers: ' + str(self.racers))
             print('Cars numbers: ' + str(self.car_numbers))
+            print('Total Parameters: ' + str(self.totalparams))
         
         else:
-            tdata = telemetry_string.split()
+            tdata = telemetry_string.split(' ')
+            if (len(tdata)-1) != len(self.header) :
+                print('Problem parsing stream (size mismatch')
             
-            self.telemetry_parsed[self.header[0]] = tdata[0] # time
-            
+            telemetry_parsed = dict()
+             
+            telemetry_parsed[self.header[0]] = tdata[0] # time
+             
             # preparing to receive data from each racer (one dict for racer)
             for x in range(1,self.racers*self.telemetry_parameters,self.telemetry_parameters):
-                self.telemetry_parsed[self.header[x][-1]] = {}
-                
+                telemetry_parsed[self.header[x][-1]] = {}
+                 
             # receiving each telemetry data from each racer individually 
-            for x in range(1,len(tdata)):
-                self.telemetry_parsed[self.header[x][-1]][self.header[x][:-1]] = tdata[x]
-                
-            newline = (str(self.telemetry_parsed) + '\n')
+            for x in range(1,self.totalparams):
+                telemetry_parsed[self.header[x][-1]][self.header[x][:-1]] = tdata[x]
+                 
+            newline = (str(telemetry_parsed) + '\n')
             debug_p_obj.writelines(newline)
 
         self.parsed_line += 1
@@ -104,6 +124,7 @@ if __name__ == '__main__':
             print('Wating for the simulation start')
             time.sleep(1)
             
-    loglines = follow(logfile)
+    loglines = tp.follow(logfile)
     for line in loglines:
-        tp.parser(line)
+        if line is not None:
+            tp.parser(line)
