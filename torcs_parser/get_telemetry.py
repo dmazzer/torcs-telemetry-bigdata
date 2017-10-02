@@ -13,6 +13,7 @@ __email__ = "dmazzer@gmail.com"
 
 
 import os
+import json
 import time
 import socket
 
@@ -105,12 +106,30 @@ class Telemetry_Parser:
             for x in range(1,self.totalparams):
                 telemetry_parsed[self.header[x][-1]][self.header[x][:-1]] = tdata[x]
                  
+            # send telemetry by UDP
+            for x in self.car_numbers:
+                self.send_telemetry(self.split_by_car(telemetry_parsed, x))
+            
+            # for debug
             newline = (str(telemetry_parsed) + '\n')
             debug_p_obj.writelines(newline)
-            self.ss.send_udp(newline)
 
         self.parsed_line += 1
                  
+
+    def split_by_car(self, telemetry_dict, car_number):
+        
+        split = {'time': telemetry_dict['time'], \
+                 car_number: telemetry_dict[car_number]}
+         
+#         print(split)
+        return (json.dumps(split) + '\n')
+        
+        
+    def send_telemetry (self, telemetry_dict):
+        self.ss.send_udp(telemetry_dict)
+    
+    
 class UDP_Socket_Server:
     def __init__(self):
         
