@@ -9,4 +9,5 @@ else
 	wget -c https://github.com/agaoglu/udp-kafka-bridge/releases/download/v0.1/udp-kafka-bridge-assembly-0.1.jar
 fi
 
+echo "Building the bridge."
 java -Dconfig.file=udp-bridge.conf -jar udp-kafka-bridge-assembly-0.1.jar
