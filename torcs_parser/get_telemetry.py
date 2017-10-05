@@ -112,9 +112,9 @@ class Telemetry_Parser:
             telemetry_parsed = list()
 
             for x, car in zip(range(0,self.players), self.car_numbers): # (0, '3')(1, '4')(2, '5')(3, '6')(4, '7')(5, '8')(6, '9')
-                telemetry_parsed.append({'Car': int(car), 'time': tdata[0], 'telemetry': {}})
+                telemetry_parsed.append({'Car': int(car), 'time': float(tdata[0]), 'telemetry': {}})
                 for k in range(1, self.telemetry_parameters+1): # 1..12
-                    telemetry_parsed[x]['telemetry'][self.header[k][:-1]] = tdata[(x*self.telemetry_parameters)+k]
+                    telemetry_parsed[x]['telemetry'][self.header[k][:-1]] = float(tdata[(x*self.telemetry_parameters)+k])
 #                  
             # send telemetry by UDP.
             self.send_telemetry(telemetry_parsed)
