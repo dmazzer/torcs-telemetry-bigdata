@@ -173,7 +173,7 @@ if __name__ == '__main__':
             logfile = open(telemetry_file,'r')
             break
         except IOError:
-            print('Wating for the simulation start')
+            print('Waiting for the simulation start')
             time.sleep(1)
             
     loglines = tp.follow(logfile)
