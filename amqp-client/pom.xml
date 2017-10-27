@@ -68,7 +68,7 @@
 							<manifest>
 								<addClasspath>true</addClasspath>
 								<classpathPrefix>lib/</classpathPrefix>
-								<mainClass>com.inatel.Consumer</mainClass>
+								<mainClass>com.inatel.runner.MainConsumer</mainClass>
 							</manifest>
 						</archive>
 					</configuration>
